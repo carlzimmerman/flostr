@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flostr/models/nostr_client.dart';
-import 'package:flostr/screens/feed_screen.dart';
+import 'feed_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -9,18 +7,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  String accountId = '';
-  String secretKey = '';
-
-  void authenticate() {
-    var nostrClient = NostrClient(['wss://atlas.nostr.land']);
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => FeedScreen(accountId, nostrClient)),
-    );
-  }
-
-
+  final _formKey = GlobalKey<FormState>();
+  final _accountIdController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -28,33 +16,29 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         title: Text('Login'),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
+      body: Form(
+        key: _formKey,
         child: Column(
           children: <Widget>[
-            TextField(
-              onChanged: (value) {
-                setState(() {
-                  accountId = value;
-                });
+            TextFormField(
+              controller: _accountIdController,
+              decoration: InputDecoration(labelText: 'Enter your account ID'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your account ID';
+                }
+                return null;
               },
-              decoration: InputDecoration(
-                labelText: 'Account ID',
-              ),
             ),
-            // TextField(
-            //   onChanged: (value) {
-            //     setState(() {
-            //       secretKey = value;
-            //     });
-            //   },
-            //   decoration: InputDecoration(
-            //     labelText: 'Secret Key',
-            //   ),
-            //   obscureText: true,
-            // ),
             ElevatedButton(
-              onPressed: authenticate,
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => FeedScreen(_accountIdController.text)),
+                  );
+                }
+              },
               child: Text('Submit'),
             ),
           ],
